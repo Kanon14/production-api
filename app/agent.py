@@ -79,6 +79,38 @@ class ProductionAgent:
         # Compile the LangGraph state machine.
         self.graph = self._build_graph()
 
+    def save_graph_image(self, output_path: str = "langgraph_agent.png") -> str:
+        """
+        Save the LangGraph workflow as a PNG image.
+
+        This function is optional and mainly useful for:
+        - Documentation
+        - README screenshots
+        - Debugging graph structure
+        - Explaining the agent workflow
+
+        Args:
+            output_path:
+                File path where the graph image should be saved.
+
+        Returns:
+            The output path of the saved graph image.
+
+        Example:
+            agent = ProductionAgent()
+            agent.save_graph_image("docs/langgraph_agent.png")
+        """
+        try:
+            graph_png = self.graph.get_graph().draw_mermaid_png()
+
+            with open(output_path, "wb") as file:
+                file.write(graph_png)
+
+            return output_path
+
+        except Exception as e:
+            raise RuntimeError(f"Failed to save LangGraph image: {e}") from e
+
     def _build_graph(self):
         """
         Build and compile the LangGraph state machine.

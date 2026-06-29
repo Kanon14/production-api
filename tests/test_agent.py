@@ -2,20 +2,11 @@ from app.agent import ProductionAgent
 
 
 def main() -> None:
-    """
-    Simple test script for ProductionAgent.
-
-    Run:
-        python test_agent.py
-
-    Make sure your .env/config contains:
-        - OPENAI_API_KEY
-        - PRIMARY_MODEL
-        - FALLBACK_MODEL
-        - MAX_RETRIES
-    """
-
     agent = ProductionAgent()
+
+    # Optional: save LangGraph workflow image
+    image_path = agent.save_graph_image("langgraph_agent.png")
+    print(f"LangGraph image saved to: {image_path}")
 
     test_queries = [
         "What is RAG? Explain in 2 sentences.",
@@ -28,20 +19,12 @@ def main() -> None:
         print(f"Test Query {index}")
         print("=" * 80)
 
-        print("User Query:")
-        print(query)
-
         result = agent.invoke(query)
 
-        print("\nAgent Response:")
-        print(result["response"])
-
-        print("\nMetadata:")
+        print(f"Query: {query}")
+        print(f"Response: {result['response']}")
         print(f"Model used: {result['model_used']}")
         print(f"Error: {result['error']}")
-
-    print("=" * 80)
-    print("ProductionAgent test completed.")
 
 
 if __name__ == "__main__":
