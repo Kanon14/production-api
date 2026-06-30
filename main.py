@@ -63,7 +63,7 @@ async def lifespan(app: FastAPI):
     # Shutdown
     logger.info("Shutting down...", 
                 extra={
-                    "extra_data": metrics.summary
+                    "extra_data": metrics.summary # Property
                 }
                 )
     
@@ -114,6 +114,12 @@ async def chat(request: Request, body: ChatRequest):
     5. Cache store
     6. Return response
     """
+    if security is None or cache is None or metrics is None or agent is None:
+        raise HTTPException(
+            status_code=503,
+            detail="Service is not ready. Please try again shortly."
+        )
+    
     with RequestTimer() as timer:
         security_notes = []
         
@@ -149,3 +155,66 @@ async def chat(request: Request, body: ChatRequest):
                 cached=True,
                 processing_time_ms=0,
             )
+            
+        # ---- Step 3: Invoke LangGraph Agent ----
+        try:
+            result = agent.invoke(cleaned_message)
+        except Exception as e:
+            logger.error(f"Agent invocation failed: {e}", extra={
+                "extra_data": {
+                    "thread_id": body.thread_id,
+                    "error": str(e),
+                }
+            })
+            metrics.record_request(latency_ms=0, error=True)
+            raise HTTPException(
+                status_code=500,
+                detail="An error occurred while processing your request."
+            )
+            
+        response_text = result["response"]
+        model_used = result["model_used"]
+        
+        # ---- Step 4: Output Validation ----
+        validated_response, output_warnings = security.check_output(response_text)
+        security_notes.extend(output_warnings)
+        
+        # ---- Step 5: Cache Store ----
+        cache.set(cleaned_message, validated_response)
+    
+    # ---- Step 6: Log & Record Metrics ----
+    input_tokens = int(len(cleaned_message.split()) * 1.3)
+    output_tokens = int(len(validated_response.split()) * 1.3)
+    
+    metrics.record_request(
+        latency_ms=timer.elapsed_ms,
+        input_tokens=input_tokens,
+        output_tokens=output_tokens,
+        cache_hit=False,
+    )
+    
+    if security_notes:
+        logger.info("Security notes", extra={
+            "extra_data": {
+                "notes": security_notes,
+                "thread_id": body.thread_id,
+            }
+        })
+        
+    logger.info("Request completed", extra={
+        "extra_data": {
+            "thread_id": body.thread_id,
+            "model_used": model_used,
+            "latency_ms": round(timer.elapsed_ms, 2),
+        }
+    })
+    
+    return ChatResponse(
+        response=validated_response,
+        thread_id=body.thread_id,
+        model_used=model_used,
+        cached=False,
+        processing_time_ms=round(timer.elapsed_ms, 2),
+    )
+        
+        
