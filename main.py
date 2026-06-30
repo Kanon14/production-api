@@ -218,3 +218,25 @@ async def chat(request: Request, body: ChatRequest):
     )
         
         
+@app.get("/health", response_model=HealthResponse)
+async def health():
+    """
+    Health check for Docker/Kubernetes.
+    """
+    settings = get_settings()
+    
+    checks = {
+        "agent": agent is not None,
+        "security": security is not None,
+        "cache": cache is not None,
+    }
+    
+    all_healthy = all(checks.values())
+    
+    return HealthResponse(
+        status="healthy" if all_healthy else "degraded",
+        environment=settings.app_env,
+        checks=checks
+    )
+    
+    
