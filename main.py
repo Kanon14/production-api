@@ -239,4 +239,13 @@ async def health():
         checks=checks
     )
     
-    
+
+@app.get("/metrics", response_model=MetricsResponse)
+async def get_metrics():
+    """
+    Metrics for monitoring dashboards.
+    """
+    summary = metrics.summary
+    return MetricsResponse(**summary)
+
+
