@@ -249,3 +249,9 @@ async def get_metrics():
     return MetricsResponse(**summary)
 
 
+@app.get("/cache/stats")
+async def cache_stats():
+    """
+    Cache performance statistics
+    """
+    return cache.stats
