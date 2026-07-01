@@ -135,9 +135,9 @@ class MetricsCollector:
             self._errors_total += 1
 
         # Only update cache metrics when cache was actually checked
-        if cache_hit is True:
+        if cache_hit:
             self._cache_hits += 1
-        elif cache_hit is False:
+        else:
             self._cache_misses += 1
 
     @property
