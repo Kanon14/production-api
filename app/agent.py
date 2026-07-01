@@ -205,11 +205,10 @@ class ProductionAgent:
             """
             if state.get("error") is None:
                 return "done"
-
-            if state["retry_count"] <= self.max_retries:
+            elif state["retry_count"] <= self.max_retries:
                 return "fallback"
-
-            return "error"
+            else:
+                return "error"
 
         def route_after_fallback(state: AgentState) -> str:
             """
@@ -221,8 +220,8 @@ class ProductionAgent:
             """
             if state.get("error") is None:
                 return "done"
-
-            return "error"
+            else:
+                return "error"
 
         # Build LangGraph.
         graph = StateGraph(AgentState)
