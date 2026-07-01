@@ -215,6 +215,7 @@ async def chat(request: Request, body: ChatRequest):
         model_used=model_used,
         cached=False,
         processing_time_ms=round(timer.elapsed_ms, 2),
+        security_notes=security_notes
     )
         
         

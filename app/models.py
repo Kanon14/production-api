@@ -28,14 +28,15 @@ class ChatResponse(BaseModel):
     model_used: str
     cached: bool = False
     processing_time_ms: float
-    timestamp: str = Field(default_factory=lambda: datetime.now(timezone.utc))
+    security_notes: list[str] = Field(default_factory=list)
+    timestamp: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     
 
 class HealthResponse(BaseModel):
     """Health check response"""
     status: str = "healthy"
     environment: str
-    version: str = "1.0.0"
+    version: str = "1.1.0"
     checks: dict = {}
     
     
