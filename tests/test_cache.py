@@ -8,7 +8,9 @@ from app.cache import ResponseCache
 
 
 class TestResponseCache:
-    """Test the response cache."""
+    """
+    Test the response cache
+    """
 
     def setup_method(self):
         self.cache = ResponseCache(ttl_seconds=2)
