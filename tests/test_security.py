@@ -1,3 +1,8 @@
+"""
+Tests for the security layer.
+These run WITHOUT any LLM calls - fast, free, deterministic.
+"""
+
 from app.security import InputSanitizer, PIIDetector, OutputValidator
 
 class TestInputSanitizer:
